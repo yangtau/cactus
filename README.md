@@ -4,34 +4,49 @@
 ```
 # this is a comment
 
-# Every thing should be viewed as function.
-# The type name after colon, which must begin with capital letter, is the
-# return type of the function.
+[1..10] | map {x->x*x}
+        | filter {x->x%2==0}
+        | stdout
 
-let a: Int32 = 1
-let b        = 2 # Int32 for default
-
-let greet = { |name: String|
-    puts 'Hello, ${name}'
+let echo = map {i->
+    puts i
+    yield i
 }
 
-greet # call the function
-
-let xs: Array<Int32> = [1, 2, 3, 4, 5]
-let ys = xs->map {|x| x*x}  # ys = [1, 4, 9, 16, 25]
-xs->map! {|x| x*x}          # xs = [1, 4, 9, 16, 25]
-# definition of map:
-#       map: Iterable->Block->Iterable
-
-10->times {
-    puts 'Hello'
+# greet is a function
+let greet = {name->
+    puts "hello, ${name}"
 }
 
-
-type Tree {
-    left: Tree
-    right: Tree
-    val: Int32
+let filter func = map {i->
+    if func i {
+        yield i
+    } 
 }
 
+let take_while func = map {i->
+    if func i {
+        yield i
+    } else {
+        close  # keyword to close a stream
+    }
+}
+
+let take n = zip [1..n] | map {x, _->
+    yield x
+}
+
+[1..100]
+    | echo   # puts and continue the stream
+    | filter {x->x%3==0}
+    | map    {x->x*x}
+    | take 20 # close the stream after take 20 elements
+    | stdout
+
+[1..10]
+    | zip stdin
+    | map {i, s->          
+        "${i} ${s}"
+      }
+    | stdout
 ```
