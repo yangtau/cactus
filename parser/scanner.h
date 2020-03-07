@@ -1,8 +1,8 @@
-#ifndef _CACTUS_SCANNER_SCANNER_H_
-#define _CACTUS_SCANNER_SCANNER_H_
+#ifndef _CACTUS_PARSER_SCANNER_H_
+#define _CACTUS_PARSER_SCANNER_H_
 
 enum token_type {
-    // separator:
+    // separator, operator:
     LEFT_PAREN = 1, // (
     RIGHT_PAREN,    // )
     LEFT_BRACE,     // {
@@ -11,21 +11,24 @@ enum token_type {
     RIGHT_BRACKET,  // ]
     COMMA,          // ,
     NEW_LINE,       // \n
-    // operator:
+    VBAR,           // |
+    COLON,          // :
+    PLUS,           // +
+    SLASH,          // /
+    STAR,           // *
+    PERCENT,        // %
+    // need to read two char
     DOT,           // .
-    PLUS,          // +
-    COLON,         // :
-    SLASH,         // /
-    STAR,          // *
     GREATER,       // >
     EQUAL,         // =
     MINUS,         // -
     LESS,          // <
+    DOT_DOT,       // ..
     EQUAL_EQUAL,   // ==
     GREATER_EQUAL, // >=
     LESS_EQUAL,    // <=
-    LEFT_ARROW,    // ->
-    RIGHT_ARROW,   // <-
+    LEFT_ARROW,    // <-
+    RIGHT_ARROW,   // ->
     BANG_EQUAL,    // !=
     // literals:
     IDENTIFIER,   // [_a-zA-Z][_a-zA-Z0-9]*
@@ -38,9 +41,14 @@ enum token_type {
     FOR,
     AND,
     OR,
+    NOT,
     LET,
     CASE,
-    SWITCH
+    SWITCH,
+    MATCH,
+    IN,
+    YIELD,
+    CLOSE
 };
 
 struct token {
@@ -49,6 +57,12 @@ struct token {
     int lexme_length;
 };
 
+/* scan_token:
+ * @tk: return the token scanned. if error, tk->lexme_length indicates the
+ * position that raises error
+ * @RETURN: the end position in source if something is found, 0 if nothing was 
+ * found, negative integer if some error occurs
+ * */
 int scan_token(const char *source, struct token *tk);
 
-#endif // _CACTUS_SCANNER_SCANNER_H_
+#endif // _CACTUS_PARSER_SCANNER_H_
