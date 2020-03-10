@@ -4,7 +4,7 @@
 #include <stdio.h>
 #include <string.h>
 // cactus include
-#include <debug.h>  // E_SCANNER_STRING
+#include <debug.h>  // E_SCANNER_STRING E_SCANNER_INVALID
 #include <macros.h> // in_range
 
 /* skip_s_t_r: skip space, \t and \r
@@ -32,17 +32,55 @@ static void skip_comment(const char *src, int *idx) {
     }
 }
 
-/* scan_identifier:
- * @RETURN: length of the identifier
+/* match_keyword:
+ * @len: the length of the string to be matched
+ * @RETURN: 0 if no keyword else the token type
  * */
-static int scan_identifier(const char *src) {
-    assert(!in_range(src[0], '0', '9'));
-    char c;
-    int len = 0;
+static enum token_type match_keyword(const char *src, int len) {
+    const static struct {
+        enum token_type type;
+        const char *s;
+    } KEYWORDS[] = {
+        {.type = IF, .s = "if"},         {.type = ELSE, .s = "else"},
+        {.type = IN, .s = "in"},         {.type = FOR, .s = "for"},
+        {.type = SWITCH, .s = "switch"}, {.type = MATCH, .s = "match"},
+        {.type = CASE, .s = "case"},     {.type = YIELD, .s = "yield"},
+        {.type = CLOSE, .s = "close"},   {.type = AND, .s = "and"},
+        {.type = OR, .s = "or"},         {.type = LET, .s = "let"},
+        {.type = NOT, .s = "not"},       {.type = 0, .s = NULL},
+    };
 
-    while ((c = src[len]) == '_' || in_range(c, 'a', 'z') ||
-           in_range(c, 'A', 'Z') || in_range(c, '0', '9')) {
+    for (int i = 0; KEYWORDS[i].type; i++) {
+        if (strncmp(src, KEYWORDS[i].s, len) == 0) {
+            return KEYWORDS[i].type;
+        }
+    }
+    return 0; // failed to match any keyword
+}
+
+/* scan_word: scan identifier or keyword. Keywords only contain lower chars.
+ * @type: return token type, IDENTIFIER or KEYWORD
+ * @RETURN: length of the word
+ * */
+static int scan_word(const char *src, enum token_type *type) {
+    assert(!in_range(src[0], '0', '9')); // a word cannot start with a digit
+    char c;
+    enum token_type t;
+    int len  = 0;
+    int flag = 0; // 1 if the word contains digit or underline or capital letter
+    
+    while ((flag = (c = src[len]) == '_' || in_range(c, '0', '9') 
+                || in_range(c, 'A', 'Z'))
+            || in_range(c, 'a', 'z')) {
         len++;
+    }
+
+    *type = IDENTIFIER;
+
+    if (!flag) { // maybe keyword
+        if ((t = match_keyword(src, len)) != 0) {
+            *type = t;
+        }
     }
 
     return len;
@@ -93,32 +131,6 @@ static int scan_number(const char *src, enum token_type *type) {
     *type = dot_flag ? NUMBER_FLOAT : NUMBER_INT;
 
     return len;
-}
-
-/* match_keyword:
- * @len: the length of the string to be matched
- * @RETURN: 0 if no keyword else the token type
- * */
-static enum token_type match_keyword(const char *src, int len) {
-    const static struct {
-        enum token_type type;
-        const char *s;
-    } KEYWORDS[] = {
-        {.type = IF, .s = "if"},         {.type = ELSE, .s = "else"},
-        {.type = IN, .s = "in"},         {.type = FOR, .s = "for"},
-        {.type = SWITCH, .s = "switch"}, {.type = MATCH, .s = "match"},
-        {.type = CASE, .s = "case"},     {.type = YIELD, .s = "yield"},
-        {.type = CLOSE, .s = "close"},   {.type = AND, .s = "and"},
-        {.type = OR, .s = "or"},         {.type = LET, .s = "let"},
-        {.type = NOT, .s = "not"},       {.type = 0, .s = NULL},
-    };
-
-    for (int i = 0; KEYWORDS[i].type; i++) {
-        if (strncmp(src, KEYWORDS[i].s, len) == 0) {
-            return KEYWORDS[i].type;
-        }
-    }
-    return 0; // failed to match any keyword
 }
 
 /* scan_single_char: scan separator or operator that has only a char, and there
@@ -233,7 +245,6 @@ int scan_token(const char *source, struct token *tk) {
     int idx = 0;
     int len;
     char c;
-    enum token_type tkt = 0;
 
     skip_s_t_r(source, &idx);
 
@@ -249,14 +260,8 @@ int scan_token(const char *source, struct token *tk) {
 
     if ((c = source[idx]) == '_' || in_range(c, 'a', 'z') ||
         in_range(c, 'A', 'Z')) { // keyword or identifier
-        len = scan_identifier(source + idx);
+        len = scan_word(source + idx, &tk->type);
         assert(len > 0);
-
-        tk->type = IDENTIFIER;
-
-        if ((tkt = match_keyword(source + idx, len)) != 0) {
-            tk->type = tkt;
-        }
     } else if ((c = source[idx]) == '"') { // string
         if ((len = scan_string(source + idx)) <= 0) {
             rc = -E_SCANNER_STRING;
@@ -274,7 +279,7 @@ int scan_token(const char *source, struct token *tk) {
             goto out;
         }
 
-        // something the scanner do not recognize;
+        // something Cactus do not recognize;
         rc = -E_SCANNER_INVALID;
         goto bad_scan_token;
     }
