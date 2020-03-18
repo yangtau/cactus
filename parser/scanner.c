@@ -167,10 +167,6 @@ static int scan_single_char(const char *src, enum token_type *type) {
  * @RETURN: the length of the operator
  * */
 static int scan_operator(const char *src, enum token_type *type) {
-    if (src[0] == '\0') {
-        return 0;
-    }
-
     char next    = src[1];
     int has_next = next != '\0';
     int len      = 0;
