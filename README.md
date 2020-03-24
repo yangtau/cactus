@@ -1,4 +1,4 @@
-# Cactus
+# lll
 
 ## Code Snippets
 ```
@@ -13,27 +13,8 @@ let echo = map {i->
     yield i
 }
 
-# greet is a function
 let greet = {name->
     puts "hello, ${name}"
-}
-
-let filter func = map {i->
-    if func i {
-        yield i
-    } 
-}
-
-let take_while func = map {i->
-    if func i {
-        yield i
-    } else {
-        close  # keyword to close a stream
-    }
-}
-
-let take n = zip [1..n] | map {x, _->
-    yield x
 }
 
 [1..100]
@@ -41,12 +22,12 @@ let take n = zip [1..n] | map {x, _->
     | filter {x->x%3==0}
     | map    {x->x*x}
     | take 20 # close the stream after take 20 elements
-    | stdout
+    |> first_twenty_stream
+# |> creates a stream
+first_twenty_stream | stdout
 
 [1..10]
     | zip stdin
-    | map {i, s->          
-        "${i} ${s}"
-      }
+    | map {i, s->"${i} ${s}"}
     | stdout
 ```

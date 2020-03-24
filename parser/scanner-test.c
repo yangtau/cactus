@@ -4,6 +4,8 @@
 #include <stdio.h>
 #include <string.h>
 
+#include "debug.h"
+
 struct test_res {
     enum token_type type;
     const char *s;
@@ -28,7 +30,8 @@ static void test_literals() {
     printf("%s\n", "test literals...");
     char *test_case =
         "hello _lower_ number231 x__0__ 234.3243 01432 24214 "
-        "00.1343214ABHS99 _33 \"hello\" \"hello \\\"world\"";
+        "00.1343214ABHS99 _33 \"hello\" \"hello \\\"world\""
+        "\"hello\\\n word\\\t\"";
     struct test_res res[] = {
         {IDENTIFIER, "hello", 5},
         {IDENTIFIER, "_lower_", 7},
@@ -100,9 +103,11 @@ static void test_op_sep() {
 static void test_source_code() {
     printf("%s\n", "test source codes...");
     char *test_case =
-        "# this is a comment\n[1..10] |\n\tmap{x->x * x} | filter{x->x % 2 "
+        " #\t\r this is a comment\n[1..10] |\n\tmap{x->x * x} | filter{x->x % "
+        "2 "
         "== 0} | stdout \t";
     struct test_res res[] = {
+        {NEW_LINE, "\n", 1},
         {LEFT_BRACKET, "[", 1},
         {NUMBER_INT, "1", 1},
         {DOT_DOT, "..", 2},
@@ -136,34 +141,47 @@ static void test_source_code() {
 
     test_tpl(test_case, res);
 
-    char *test_case1 = "[1..100] | echo #puts and continue the stream \n"
-                            "\t\t| map{_->x * x}\n"
-                            "\t\t| take 20 #close the stream after take 20 elements\n";
+    char *test_case1 =
+        "# this a comment\n"
+        "[1..100] | echo #puts and continue the stream \n"
+        "\t\t| map{_->x * x}\n"
+        "\t\t| take 20 #close the stream after take 20 elements\n";
 
     struct test_res res1[] = {
-        {LEFT_BRACKET, "[", 1},
-        {NUMBER_INT, "1", 1},
-        {DOT_DOT, "..", 2},
-        {NUMBER_INT, "100", 3},
-        {RIGHT_BRACKET, "]", 1},
-        {VBAR, "|", 1},
-        {IDENTIFIER, "echo", 4},
-        {VBAR, "|", 1},
-        {IDENTIFIER, "map", 3},
-        {LEFT_BRACE, "{", 1},
-        {IDENTIFIER, "_", 1},
-        {RIGHT_ARROW, "->", 2},
-        {IDENTIFIER, "x", 1},
-        {STAR, "*", 1},
-        {IDENTIFIER, "x", 1},
-        {RIGHT_BRACE, "}", 1},
-        {NEW_LINE, "\n", 1},
-        {VBAR, "|", 1},
-        {IDENTIFIER, "take", 4},
-        {NUMBER_INT, "20", 2},
-        {0, "", 0},
+        {NEW_LINE, "\n", 1},   {LEFT_BRACKET, "[", 1},  {NUMBER_INT, "1", 1},
+        {DOT_DOT, "..", 2},    {NUMBER_INT, "100", 3},  {RIGHT_BRACKET, "]", 1},
+        {VBAR, "|", 1},        {IDENTIFIER, "echo", 4}, {NEW_LINE, "\n", 1},
+        {VBAR, "|", 1},        {IDENTIFIER, "map", 3},  {LEFT_BRACE, "{", 1},
+        {IDENTIFIER, "_", 1},  {RIGHT_ARROW, "->", 2},  {IDENTIFIER, "x", 1},
+        {STAR, "*", 1},        {IDENTIFIER, "x", 1},    {RIGHT_BRACE, "}", 1},
+        {NEW_LINE, "\n", 1},   {VBAR, "|", 1},          {IDENTIFIER, "take", 4},
+        {NUMBER_INT, "20", 2}, {NEW_LINE, "\n", 1},     {0, "", 0},
     };
     test_tpl(test_case1, res1);
+}
+
+static void test_invalid_lexme() {
+    struct token tk;
+    int rc;
+    char *test_case;
+
+    printf("test invalid lexmes...\n");
+
+    // case 1: string error
+    test_case = " \"hello";
+    rc        = scan_token(test_case, &tk);
+    assert(rc == -E_SCANNER_STRING);
+    assert(tk.lexme_length == 1);
+
+    // case 2: invalid operator
+    test_case = "@!~$";
+
+    while (*test_case) {
+        rc = scan_token(test_case, &tk);
+        assert(rc == -E_SCANNER_INVALID);
+        assert(tk.lexme_length == 0);
+        test_case++;
+    }
 }
 
 static void test() {
@@ -171,6 +189,7 @@ static void test() {
     test_keywords();
     test_literals();
     test_source_code();
+    test_invalid_lexme();
 }
 
 int main() {

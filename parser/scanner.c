@@ -25,11 +25,6 @@ static void skip_comment(const char *src, int *idx) {
     while ((c = src[*idx]) != '\0' && c != '\n') {
         (*idx)++;
     }
-
-    // skip \n in comment
-    if (c == '\n') {
-        (*idx)++;
-    }
 }
 
 /* match_keyword:
@@ -101,7 +96,7 @@ static int scan_string(const char *src) {
         len++;
     }
 
-    return 0; // error: only a "
+    return 0; // error: only one "
 }
 
 /* scan_number:
@@ -275,7 +270,7 @@ int scan_token(const char *source, struct token *tk) {
             goto out;
         }
 
-        // something Cactus do not recognize;
+        // something Cactus does not recognize;
         rc = -E_SCANNER_INVALID;
         goto bad_scan_token;
     }

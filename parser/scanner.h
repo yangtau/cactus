@@ -59,7 +59,7 @@ struct token {
 
 /* scan_token:
  * @tk: return the token scanned. if error, tk->lexme_length indicates the
- * position that raises error
+ * position where the error occurs
  * @RETURN: the end position in source if something is found, 0 if nothing was 
  * found, negative integer if some error occurs
  * */
