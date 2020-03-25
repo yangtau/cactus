@@ -12,7 +12,7 @@ objs = $(patsubst %.c, %.o, $(src))
 all: $(objs)
 
 scanner-test: $(objs)
-	$(CC) $(CFLAGS) -o $(bin)/scanner-test $(bin)/scanner.o $(bin)/scanner-test.o 
+	$(CC) $(CFLAGS) -o $(bin)/scanner-test $(bin)/scanner.o $(bin)/scanner_test.o 
 	$(bin)/scanner-test
 
 $(objs):%.o: %.c $(bin)
