@@ -4,7 +4,8 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "debug.h"
+#include <lll_error.h>
+
 
 struct test_res {
     enum token_type type;
@@ -170,7 +171,7 @@ static void test_invalid_lexme() {
     // case 1: string error
     test_case = " \"hello";
     rc        = scan_token(test_case, &tk);
-    assert(rc == -E_SCANNER_STRING);
+    assert(rc == -E_SCANNER_INVALID_STRING);
     assert(tk.lexme_length == 1);
 
     // case 2: invalid operator
@@ -178,7 +179,7 @@ static void test_invalid_lexme() {
 
     while (*test_case) {
         rc = scan_token(test_case, &tk);
-        assert(rc == -E_SCANNER_INVALID);
+        assert(rc == -E_SCANNER_INVALID_SYMBOL);
         assert(tk.lexme_length == 0);
         test_case++;
     }

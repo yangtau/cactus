@@ -3,9 +3,8 @@
 #include <assert.h>
 #include <stdio.h>
 #include <string.h>
-// cactus include
-#include <debug.h>  // E_SCANNER_STRING E_SCANNER_INVALID
-#include <macros.h> // in_range
+#include <lll_error.h>  // E_SCANNER_INVALID_STRING E_SCANNER_INVALID_SYMBOL
+#include <macros.h> // IN
 
 /* skip_s_t_r: skip space, \t and \r
  * @idx: return the index of the first char that is not space, \t or \r
@@ -58,15 +57,15 @@ static enum token_type match_keyword(const char *src, int len) {
  * @RETURN: length of the word
  * */
 static int scan_word(const char *src, enum token_type *type) {
-    assert(!in_range(src[0], '0', '9')); // a word cannot start with a digit
+    assert(!IN(src[0], '0', '9')); // a word cannot start with a digit
     char c;
     enum token_type t;
     int len  = 0;
     int flag = 0; // 1 if the word contains digit or underline or capital letter
     
-    while ((flag = (c = src[len]) == '_' || in_range(c, '0', '9') 
-                || in_range(c, 'A', 'Z'))
-            || in_range(c, 'a', 'z')) {
+    while ((flag = (c = src[len]) == '_' || IN(c, '0', '9') 
+                || IN(c, 'A', 'Z'))
+            || IN(c, 'a', 'z')) {
         len++;
     }
 
@@ -103,12 +102,12 @@ static int scan_string(const char *src) {
  * @RETURN: the length of number
  * */
 static int scan_number(const char *src, enum token_type *type) {
-    assert(in_range(src[0], '0', '9'));
+    assert(IN(src[0], '0', '9'));
     int len;
     int dot_flag = 0;
 
     for (len = 0; src[len] != '\0'; len++) {
-        if (in_range(src[len], '0', '9')) {
+        if (IN(src[len], '0', '9')) {
             continue;
         }
         if (!dot_flag && src[len] == '.') {
@@ -249,17 +248,17 @@ int scan_token(const char *source, struct token *tk) {
         goto bad_scan_token;
     }
 
-    if ((c = source[idx]) == '_' || in_range(c, 'a', 'z') ||
-        in_range(c, 'A', 'Z')) { // keyword or identifier
+    if ((c = source[idx]) == '_' || IN(c, 'a', 'z') ||
+        IN(c, 'A', 'Z')) { // keyword or identifier
         len = scan_word(source + idx, &tk->type);
         assert(len > 0);
     } else if ((c = source[idx]) == '"') { // string
         if ((len = scan_string(source + idx)) <= 0) {
-            rc = -E_SCANNER_STRING;
+            rc = -E_SCANNER_INVALID_STRING;
             goto bad_scan_token;
         }
         tk->type = STRING;
-    } else if (in_range(source[idx], '0', '9')) { // number
+    } else if (IN(source[idx], '0', '9')) { // number
         len = scan_number(source + idx, &tk->type);
         assert(len > 0);
     } else {
@@ -271,7 +270,7 @@ int scan_token(const char *source, struct token *tk) {
         }
 
         // something Cactus does not recognize;
-        rc = -E_SCANNER_INVALID;
+        rc = -E_SCANNER_INVALID_SYMBOL;
         goto bad_scan_token;
     }
 

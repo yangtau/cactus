@@ -1,6 +1,6 @@
 CC = gcc
 CFLAGS += -std=gnu99 -g -Wall 
-INCLUDE = -Idebug -Ilibs
+INCLUDE = -Icommon
 
 MKDIR = mkdir -p
 
