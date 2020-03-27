@@ -1,5 +1,5 @@
-#ifndef _LLL_PARSER_SCANNER_H_
-#define _LLL_PARSER_SCANNER_H_
+#ifndef _LLL_PARSER_PARSER_H_
+#define _LLL_PARSER_PARSER_H_
 
 enum token_type {
     // separator, operator:
@@ -65,4 +65,4 @@ struct token {
  * */
 int scan_token(const char *source, struct token *tk);
 
-#endif // _LLL_PARSER_SCANNER_H_
+#endif // _LLL_PARSER_PARSER_H_

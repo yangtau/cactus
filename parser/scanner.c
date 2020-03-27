@@ -1,4 +1,4 @@
-#include "scanner.h"
+#include "parser.h" // token token_type
 
 #include <assert.h>
 #include <stdio.h>
