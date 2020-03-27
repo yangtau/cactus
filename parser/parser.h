@@ -3,52 +3,52 @@
 
 enum token_type {
     // separator, operator:
-    LEFT_PAREN = 1, // (
-    RIGHT_PAREN,    // )
-    LEFT_BRACE,     // {
-    RIGHT_BRACE,    // }
-    LEFT_BRACKET,   // [
-    RIGHT_BRACKET,  // ]
-    COMMA,          // ,
-    NEW_LINE,       // \n
-    VBAR,           // |
-    COLON,          // :
-    PLUS,           // +
-    SLASH,          // /
-    STAR,           // *
-    PERCENT,        // %
+    TOKEN_LEFT_PAREN = 1, // (
+    TOKEN_RIGHT_PAREN,    // )
+    TOKEN_LEFT_BRACE,     // {
+    TOKEN_RIGHT_BRACE,    // }
+    TOKEN_LEFT_BRACKET,   // [
+    TOKEN_RIGHT_BRACKET,  // ]
+    TOKEN_COMMA,          // ,
+    TOKEN_NEW_LINE,       // \n
+    TOKEN_VBAR,           // |
+    TOKEN_COLON,          // :
+    TOKEN_PLUS,           // +
+    TOKEN_SLASH,          // /
+    TOKEN_STAR,           // *
+    TOKEN_PERCENT,        // %
     // need to read two char
-    DOT,           // .
-    GREATER,       // >
-    EQUAL,         // =
-    MINUS,         // -
-    LESS,          // <
-    DOT_DOT,       // ..
-    EQUAL_EQUAL,   // ==
-    GREATER_EQUAL, // >=
-    LESS_EQUAL,    // <=
-    LEFT_ARROW,    // <-
-    RIGHT_ARROW,   // ->
-    BANG_EQUAL,    // !=
+    TOKEN_DOT,           // .
+    TOKEN_GREATER,       // >
+    TOKEN_EQUAL,         // =
+    TOKEN_MINUS,         // -
+    TOKEN_LESS,          // <
+    TOKEN_DOT_DOT,       // ..
+    TOKEN_EQUAL_EQUAL,   // ==
+    TOKEN_GREATER_EQUAL, // >=
+    TOKEN_LESS_EQUAL,    // <=
+    TOKEN_LEFT_ARROW,    // <-
+    TOKEN_RIGHT_ARROW,   // ->
+    TOKEN_BANG_EQUAL,    // !=
     // literals:
-    IDENTIFIER,   // [_a-zA-Z][_a-zA-Z0-9]*
-    STRING,       // "(.|\n)*"
-    NUMBER_INT,   // integer
-    NUMBER_FLOAT, // float
+    TOKEN_IDENTIFIER,   // [_a-zA-Z][_a-zA-Z0-9]*
+    TOKEN_STRING,       // "(.|\n)*"
+    TOKEN_NUMBER_INT,   // integer
+    TOKEN_NUMBER_FLOAT, // float
     // keywords:
-    IF,
-    ELSE,
-    FOR,
-    AND,
-    OR,
-    NOT,
-    LET,
-    CASE,
-    SWITCH,
-    MATCH,
-    IN,
-    YIELD,
-    CLOSE
+    TOKEN_IF,
+    TOKEN_ELSE,
+    TOKEN_FOR,
+    TOKEN_AND,
+    TOKEN_OR,
+    TOKEN_NOT,
+    TOKEN_LET,
+    TOKEN_CASE,
+    TOKEN_SWITCH,
+    TOKEN_MATCH,
+    TOKEN_IN,
+    TOKEN_YIELD,
+    TOKEN_TOKEN_CLOSE,
 };
 
 struct token {

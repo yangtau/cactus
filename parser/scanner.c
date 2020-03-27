@@ -34,26 +34,26 @@ static enum token_type match_keyword(const char *src, int len) {
     const static struct {
         enum token_type type;
         const char *s;
-    } KEYWORDS[] = {
-        {.type = IF, .s = "if"},         {.type = ELSE, .s = "else"},
-        {.type = IN, .s = "in"},         {.type = FOR, .s = "for"},
-        {.type = SWITCH, .s = "switch"}, {.type = MATCH, .s = "match"},
-        {.type = CASE, .s = "case"},     {.type = YIELD, .s = "yield"},
-        {.type = CLOSE, .s = "close"},   {.type = AND, .s = "and"},
-        {.type = OR, .s = "or"},         {.type = LET, .s = "let"},
-        {.type = NOT, .s = "not"},       {.type = 0, .s = NULL},
+    } KEYWTOKEN_ORDS[] = {
+        {.type = TOKEN_IF, .s = "if"},         {.type = TOKEN_ELSE, .s = "else"},
+        {.type = TOKEN_IN, .s = "in"},         {.type = TOKEN_FOR, .s = "for"},
+        {.type = TOKEN_SWITCH, .s = "switch"}, {.type = TOKEN_MATCH, .s = "match"},
+        {.type = TOKEN_CASE, .s = "case"},     {.type = TOKEN_YIELD, .s = "yield"},
+        {.type = TOKEN_TOKEN_CLOSE, .s = "close"},   {.type = TOKEN_AND, .s = "and"},
+        {.type = TOKEN_OR, .s = "or"},         {.type = TOKEN_LET, .s = "let"},
+        {.type = TOKEN_NOT, .s = "not"},       {.type = 0, .s = NULL},
     };
 
-    for (int i = 0; KEYWORDS[i].type; i++) {
-        if (strncmp(src, KEYWORDS[i].s, len) == 0) {
-            return KEYWORDS[i].type;
+    for (int i = 0; KEYWTOKEN_ORDS[i].type; i++) {
+        if (strncmp(src, KEYWTOKEN_ORDS[i].s, len) == 0) {
+            return KEYWTOKEN_ORDS[i].type;
         }
     }
     return 0; // failed to match any keyword
 }
 
 /* scan_word: scan identifier or keyword. Keywords only contain lower chars.
- * @type: return token type, IDENTIFIER or KEYWORD
+ * @type: return token type, TOKEN_IDENTIFIER or KEYWORD
  * @RETURN: length of the word
  * */
 static int scan_word(const char *src, enum token_type *type) {
@@ -69,7 +69,7 @@ static int scan_word(const char *src, enum token_type *type) {
         len++;
     }
 
-    *type = IDENTIFIER;
+    *type = TOKEN_IDENTIFIER;
 
     if (!flag) { // maybe keyword
         if ((t = match_keyword(src, len)) != 0) {
@@ -122,7 +122,7 @@ static int scan_number(const char *src, enum token_type *type) {
         dot_flag = 0;
     }
 
-    *type = dot_flag ? NUMBER_FLOAT : NUMBER_INT;
+    *type = dot_flag ? TOKEN_NUMBER_FLOAT : TOKEN_NUMBER_INT;
 
     return len;
 }
@@ -137,13 +137,13 @@ static int scan_single_char(const char *src, enum token_type *type) {
         enum token_type type;
         const char ch;
     } SINGLE_CHARS[] = {
-        {.type = LEFT_PAREN, .ch = '('},   {.type = RIGHT_PAREN, .ch = ')'},
-        {.type = LEFT_BRACE, .ch = '{'},   {.type = RIGHT_BRACE, .ch = '}'},
-        {.type = LEFT_BRACKET, .ch = '['}, {.type = RIGHT_BRACKET, .ch = ']'},
-        {.type = COMMA, .ch = ','},        {.type = NEW_LINE, .ch = '\n'},
-        {.type = COLON, .ch = ':'},        {.type = PLUS, .ch = '+'},
-        {.type = SLASH, .ch = '/'},        {.type = VBAR, .ch = '|'},
-        {.type = STAR, .ch = '*'},         {.type = PERCENT, .ch = '%'},
+        {.type = TOKEN_LEFT_PAREN, .ch = '('},   {.type = TOKEN_RIGHT_PAREN, .ch = ')'},
+        {.type = TOKEN_LEFT_BRACE, .ch = '{'},   {.type = TOKEN_RIGHT_BRACE, .ch = '}'},
+        {.type = TOKEN_LEFT_BRACKET, .ch = '['}, {.type = TOKEN_RIGHT_BRACKET, .ch = ']'},
+        {.type = TOKEN_COMMA, .ch = ','},        {.type = TOKEN_NEW_LINE, .ch = '\n'},
+        {.type = TOKEN_COLON, .ch = ':'},        {.type = TOKEN_PLUS, .ch = '+'},
+        {.type = TOKEN_SLASH, .ch = '/'},        {.type = TOKEN_VBAR, .ch = '|'},
+        {.type = TOKEN_STAR, .ch = '*'},         {.type = TOKEN_PERCENT, .ch = '%'},
         {.type = 0, .ch = '\0'},
     };
 
@@ -166,58 +166,58 @@ static int scan_operator(const char *src, enum token_type *type) {
     int len      = 0;
 
     switch (src[0]) {
-    case '>': /* GREATER, GREATER_EQUAL */
+    case '>': /* >, >= */
         if (has_next && next == '=') {
             len   = 2;
-            *type = GREATER_EQUAL;
+            *type = TOKEN_GREATER_EQUAL;
         } else {
             len   = 1;
-            *type = GREATER;
+            *type = TOKEN_GREATER;
         }
         break;
-    case '<': /* LESS, LESS_EQUAL, LEFT_ARROW */
+    case '<': /* <, <=, <- */
         if (has_next && next == '=') {
             len   = 2;
-            *type = LESS_EQUAL;
+            *type = TOKEN_LESS_EQUAL;
         } else if (has_next && next == '-') {
             len   = 2;
-            *type = LEFT_ARROW;
+            *type = TOKEN_LEFT_ARROW;
         } else {
             len   = 1;
-            *type = LESS;
+            *type = TOKEN_LESS;
         }
         break;
-    case '-': /* MINUS, RIGHT_ARROW, */
+    case '-': /* -, ->, */
         if (has_next && next == '>') {
             len   = 2;
-            *type = RIGHT_ARROW;
+            *type = TOKEN_RIGHT_ARROW;
         } else {
             len   = 1;
-            *type = MINUS;
+            *type = TOKEN_MINUS;
         }
         break;
-    case '=': /* EQUAL  EQAUL_EQUAL */
+    case '=': /* ==, = */
         if (has_next && next == '=') {
             len   = 2;
-            *type = EQUAL_EQUAL;
+            *type = TOKEN_EQUAL_EQUAL;
         } else {
             len   = 1;
-            *type = EQUAL;
+            *type = TOKEN_EQUAL;
         }
         break;
-    case '.': /* DOT DOT_DOT */
+    case '.': /* ., .. */
         if (has_next && next == '.') {
             len   = 2;
-            *type = DOT_DOT;
+            *type = TOKEN_DOT_DOT;
         } else {
             len   = 1;
-            *type = DOT;
+            *type = TOKEN_DOT;
         }
         break;
-    case '!': /* BANG_EQUAL */
+    case '!': /* != */
         if (has_next && next == '=') {
             len   = 2;
-            *type = BANG_EQUAL;
+            *type = TOKEN_BANG_EQUAL;
         } else {
             len = 0; // only !
         }
@@ -257,7 +257,7 @@ int scan_token(const char *source, struct token *tk) {
             rc = -E_SCANNER_INVALID_STRING;
             goto bad_scan_token;
         }
-        tk->type = STRING;
+        tk->type = TOKEN_STRING;
     } else if (IN(source[idx], '0', '9')) { // number
         len = scan_number(source + idx, &tk->type);
         assert(len > 0);
