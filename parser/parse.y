@@ -9,9 +9,13 @@
 }
 
 %token int string id float
-%token or and not let leftarrow
+%token or and not let leftarrow sep
 
 %%
+
+stats:
+     stat           |
+     stats sep stat ;
 
 stat:
      expr              |
@@ -22,8 +26,8 @@ expr:
     bool_expr ;
 
 block:
-     '{' vars leftarrow stat '}'
-     '{' stat '}' ;
+     '{' vars leftarrow stats '}'
+     '{' stats '}' ;
 
 vars:
     id          |
