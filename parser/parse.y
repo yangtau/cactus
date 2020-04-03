@@ -9,7 +9,7 @@
 }
 
 %token int string id float
-%token or and not let leftarrow sep
+%token or and not leftarrow sep let def
 
 %%
 
@@ -18,27 +18,42 @@ stats:
      stats sep stat ;
 
 stat:
-     expr              |
-     let vars '=' expr ;
+     expr          |
+     vars '=' expr |
+     func_def      ;
 
-expr:
-    block     |
-    bool_expr ;
+func_def:
+    /*
+    def fn = {a, b -> a+b}
+    */
+    def id '=' block ;
 
 block:
-     '{' vars leftarrow stats '}'
-     '{' stats '}' ;
+     '{' stats '}'                |
+     '{' vars leftarrow stats '}' ;
+
+expr:
+    bool_expr    |
+    block ;
 
 vars:
-    id          |
-    vars ',' id ;
+    id           |
+    vars ',' id  |
+    list_pattern ;
+
+list_pattern:  /* [a, *xs], [a, b, *xs], [a, *xs, b] */
+    '[' vars ',' list_unpack ']'          |
+    '[' vars ',' list_unpack ',' vars ']' ;
+
+list_unpack: /* *xs */
+    '*' id;
+
+tuple:
+     '(' args ')' ;
 
 args:
     expr          |
     args ',' expr ;
-
-tuple:
-     '(' args ')' ;
 
 bool_expr:
     bool_expr or cmp_expr  |
