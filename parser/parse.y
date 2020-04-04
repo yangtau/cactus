@@ -9,7 +9,7 @@
 }
 
 %token int string id float
-%token or and not leftarrow sep let def
+%token or and not leftarrow sep let def to_left /* |> */
 
 %%
 
@@ -18,38 +18,61 @@ stats:
      stats sep stat ;
 
 stat:
-     expr          |
-     vars '=' expr |
-     func_def      ;
+     expr      |
+     vars_def  ;
 
-func_def:
-    /*
-    def fn = {a, b -> a+b}
-    */
-    def id '=' block ;
+vars_def:
+    let vars '=' expr   |
+    /* stm |> s */
+    stream to_left vars ;
 
-block:
-     '{' stats '}'                |
-     '{' vars leftarrow stats '}' ;
+stream:
+    /* [1..20] | map id */
+    expr '|' pipeline    |
+    stream '|' pipeline  ;
 
-expr:
-    bool_expr    |
-    block ;
+pipeline:
+    id         |
+    func_call  ;
+
+func_call:
+    id args;
 
 vars:
     id           |
-    vars ',' id  |
-    list_pattern ;
+    vars ',' id  ;
 
-list_pattern:  /* [a, *xs], [a, b, *xs], [a, *xs, b] */
-    '[' vars ',' list_unpack ']'          |
-    '[' vars ',' list_unpack ',' vars ']' ;
+expr:
+    bool_expr |
+    block     ;
 
-list_unpack: /* *xs */
-    '*' id;
+block:
+     '{' leftarrow stats '}'      |
+     '{' vars leftarrow stats '}' ;
+
+list:
+    '[' ']'                          |
+    '[' args ']'                     | 
+    /* [*id] or [*(func_call)] */
+    '[' unpack ']'                   | 
+    '[' args ',' unpack ']'          |
+    '[' args ',' unpack ',' args ']' ;
+
+unpack:
+   '*' id                |
+   '*' '(' func_call ')' ;
+
+dict:
+    '{' '}'        |
+    '{' tuples '}' ;
+
+tuples:
+    tuple        |
+    tuples tuple ;
 
 tuple:
-     '(' args ')' ;
+    '(' ')'      |
+    '(' args ')' ;
 
 args:
     expr          |
@@ -78,14 +101,17 @@ term:
     unary          ;
 
 unary:
-     '-' factor |
-     factor     ;
+     '(' '-' factor  ')' |
+     factor              ;
 
 factor:
-    tuple  |
-    id     |
-    string |
-    int    |
-    float  ;
+    '(' func_call  ')'|
+    tuple             |
+    list              |
+    dict              |
+    id                |
+    string            |
+    int               |
+    float             ;
 
 %%
